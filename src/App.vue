@@ -1,17 +1,16 @@
 <script setup lang="ts">
-import keyboard from './kb/iso-azerty.svg?raw'
+import KB from './kb/KB.vue'
 </script>
 
 <template>
-  <h1>You did it!</h1>
-  <p>
-    Visit <a href="https://vuejs.org/" target="_blank" rel="noopener">vuejs.org</a> to read the
-    documentation
-  </p>
-  <div v-html="keyboard"></div>
+  <h1>Don't loose your mind!!!!!</h1>
+  <KB :layer="'singlehandmode'"></KB>
 </template>
 
 <style>
+#key-slots .added {
+  stroke: none;
+}
 #key-slots :not(.added) {
   stroke: transparent;
 }
