@@ -1,4 +1,6 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import keyboard from './kb/iso-azerty.svg?raw'
+</script>
 
 <template>
   <h1>You did it!</h1>
@@ -6,6 +8,11 @@
     Visit <a href="https://vuejs.org/" target="_blank" rel="noopener">vuejs.org</a> to read the
     documentation
   </p>
+  <div v-html="keyboard"></div>
 </template>
 
-<style scoped></style>
+<style>
+#key-slots :not(.added) {
+  stroke: transparent;
+}
+</style>
