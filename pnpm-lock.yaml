@@ -8,9 +8,15 @@ dependencies:
   '@tauri-apps/api':
     specifier: ^2.9.1
     version: 2.9.1
+  '@tauri-apps/plugin-fs':
+    specifier: ~2
+    version: 2.4.5
   pinia:
     specifier: ^3.0.4
     version: 3.0.4(typescript@5.9.3)(vue@3.5.26)
+  s-expression:
+    specifier: ^3.1.1
+    version: 3.1.1
   vue:
     specifier: ^3.5.26
     version: 3.5.26(typescript@5.9.3)
@@ -1082,6 +1088,12 @@ packages:
       '@tauri-apps/cli-win32-ia32-msvc': 2.9.6
       '@tauri-apps/cli-win32-x64-msvc': 2.9.6
     dev: true
+
+  /@tauri-apps/plugin-fs@2.4.5:
+    resolution: {integrity: sha512-dVxWWGE6VrOxC7/jlhyE+ON/Cc2REJlM35R3PJX3UvFw2XwYhLGQVAIyrehenDdKjotipjYEVc4YjOl3qq90fA==}
+    dependencies:
+      '@tauri-apps/api': 2.9.1
+    dev: false
 
   /@tsconfig/node24@24.0.4:
     resolution: {integrity: sha512-2A933l5P5oCbv6qSxHs7ckKwobs8BDAe9SJ/Xr2Hy+nDlwmLE1GhFh/g/vXGRZWgxBg9nX/5piDtHR9Dkw/XuA==}
@@ -2498,6 +2510,10 @@ packages:
     dependencies:
       queue-microtask: 1.2.3
     dev: true
+
+  /s-expression@3.1.1:
+    resolution: {integrity: sha512-VMsW7sIvixXfIDmDll7XCePMYYY52UlUtA7OlFQUovqj3XtQ2UkZkjjAvnSFW8o+SbswzUEeCBMmpAx9LS3qrg==}
+    dev: false
 
   /semver@6.3.1:
     resolution: {integrity: sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA==}
