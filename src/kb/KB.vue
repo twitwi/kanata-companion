@@ -30,7 +30,7 @@ const customKeys = {
   'S-del': 'cut',
   'S-ins': 'paste',
   'C-ins': 'copy',
-}
+} as Record<string, string | [string, string]>;
 
 const patchDescriptor = computed(() => {
   const l = props.layer
@@ -110,7 +110,7 @@ function refreshModifications() {
   const k = wrapper.value;
   if (!k) return;
   k.querySelectorAll('.added').forEach(e => e.remove())
-  for (const [key, v] of Object.entries(patch.value)) {
+  for (const [key, v] of Object.entries<[string, string]>(patch.value)) {
     const el = k.querySelector<SVGElement>(`#k${key}`)
     if (el) {
       // insert text after the box, same location
@@ -125,7 +125,6 @@ function refreshModifications() {
       text.setAttribute("font-size", "30")
       text.textContent = v[0]
       text.setAttribute("fill", v[1])
-      const fontSize = '30'
       if (v[0].length > 2) {
         text.setAttribute("font-size", "15")
         text.setAttribute("dx", attr(el, "width", "0", v => (parseFloat(v) * 1 / 2).toString()))

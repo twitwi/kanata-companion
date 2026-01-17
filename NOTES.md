@@ -27,6 +27,7 @@ pnpm tauri dev
 
 
 
-? pnpm build
+? ////pnpm build
 ? pnpm tauri build
 ? pnpm tauri bundle
+ 

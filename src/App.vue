@@ -10,7 +10,7 @@ const layer = ref('default');
 
 listen('kanata-message', (event) => {
   console.log("Received kanata message:", event);
-  const msg = JSON.parse(event.payload ?? '{}');
+  const msg = JSON.parse(event.payload?.toString() ?? '{}');
   const l = msg?.LayerChange?.new
   console.log("Layer change:", l)
   if (l) {
