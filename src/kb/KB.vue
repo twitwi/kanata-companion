@@ -89,7 +89,8 @@ const keyToIdPatch: Record<string, string> = {
   ']': 'krbracket',
   ';': 'ksemicolon',
   "'": 'kquote',
-  '.': 'kperiod',
+  ',': 'klt',
+  '.': 'kgt',
   '/': 'kslash',
   '\\': 'kbackslash',
 }
