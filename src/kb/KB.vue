@@ -1,29 +1,31 @@
 <script setup lang="ts">
-import { isArray } from 'mathjs'
+import type { SExpression } from '@/sexpression';
 import keyboard from './iso-azerty.svg?raw'
 
 import { onMounted, ref, computed, watch } from 'vue'
 
+type KeyRenderDescriptor = [string, string, Record<string, string>?]
+
 const props = defineProps<{
   layer: string
-  layerDefs: Record<string, Record<string, string>>
+  layerDefs: Record<string, Record<string, SExpression>>
 }>()
 
 const wrapper = ref<HTMLDivElement | null>(null)
 
-type KeyRenderDescriptor = [string, string, Record<string, string>?]
-
-const customKeys = {
+// some custom key renderings, and also pseudo-keys for special actions
+type KeyRenderDescriptorPartial = string | KeyRenderDescriptor
+const customKeys : Record<string, KeyRenderDescriptorPartial> = {
   // arrows
-  left: '⇠',
-  up: '⇡',
-  down: '⇣',
-  rght: '⇢',
+  left: '⬅',
+  up: '⬆',
+  down: '⬇',
+  rght: '➡',
   // mouse motion
-  ':mouseleft': ['⇠', 'cyan', { bg: '#00007FAA' }],
-  ':mouseup': ['⇡', 'cyan', { bg: '#00007FAA' }],
-  ':mousedown': ['⇣', 'cyan', { bg: '#00007FAA' }],
-  ':mouseright': ['⇢', 'cyan', { bg: '#00007FAA' }],
+  ':mouseleft': ['⬅', 'cyan', { bg: '#00007FAA' }],
+  ':mouseup': ['⬆', 'cyan', { bg: '#00007FAA' }],
+  ':mousedown': ['⬇', 'cyan', { bg: '#00007FAA' }],
+  ':mouseright': ['➡', 'cyan', { bg: '#00007FAA' }],
   ':wheelleft': ['…', 'cyan', { bg: '#00007FAA' }],
   ':wheelup': ['…', 'cyan', { bg: '#00007FAA' }],
   ':wheeldown': ['…', 'cyan', { bg: '#00007FAA' }],
@@ -31,36 +33,27 @@ const customKeys = {
   // custom look for shortcuts
   'A-S-tab': ['⎇⇤', 'darkorange'],
   'A-tab': ['⎇⇢', 'darkorange'],
-  'A-C-left': ['⇠', 'darkorange'], //['🖥⇠', 'darkorange'],
-  'A-C-right': ['⇢', 'darkorange'], //['🖥⇢', 'darkorange'],
+  'A-C-left': ['⭅', 'darkorange'], //['🖥⇠', 'darkorange'],
+  'A-C-right': ['⭆', 'darkorange'], //['🖥⇢', 'darkorange'],
   tab: '↹',
   enter: '↵',
   backspace: '←',
   'S-del': 'cut',
   'S-ins': 'paste',
   'C-ins': 'copy',
-} as Record<string, string | KeyRenderDescriptor>
+}
+function getCustomKey(k: string): KeyRenderDescriptorPartial {
+  const v = customKeys[k]
+  if (v === undefined) {
+    throw new Error('Unknown custom key: ' + k)
+  }
+  if (typeof v === 'string') {
+    return [v, 'darkred']
+  }
+  return v
+}
 
-const patchDescriptor = computed(() => props.layerDefs[props.layer] || {})
-
-const patch = computed<Record<string, KeyRenderDescriptor>>(() =>
-  Object.fromEntries(
-    Object.entries(patchDescriptor.value).map(([k, vv]) => {
-      let v = vv as string | string[] | KeyRenderDescriptor
-      if (typeof v === 'string' && v in customKeys) {
-        v = customKeys[v]!
-      }
-      if (typeof v === 'string') {
-        v = [v]
-      }
-      if (v.length < 2) {
-        v.push('darkred')
-      }
-      return [k, v as KeyRenderDescriptor]
-    }),
-  ),
-)
-
+// utilities
 function attr<T>(
   el: Element,
   name: string,
@@ -77,7 +70,11 @@ function attrFloat(el: Element, name: string, defaultValue: number): number {
   if (v === null) return defaultValue
   return parseFloat(v)
 }
+function isString(v: string | SExpression | undefined): v is string {
+   return typeof v === 'string'
+}
 
+// map kanata key id to svg element id
 const keyToIdPatch: Record<string, string> = {
   '`': 'kbackquote',
   '-': 'kdash',
@@ -100,7 +97,20 @@ function keyToId(k: string) {
   return 'k' + k
 }
 
-function valueToValue(v: [string, string, Record<string, string>?]): string[] {
+// Transform an SExpression value (as parsed) into a KeyRenderDescriptor (for rendering)
+function valueToValue(vv: SExpression): KeyRenderDescriptor {
+  let v : KeyRenderDescriptorPartial | SExpression = vv
+  if (typeof v === 'string' && v in customKeys) {
+    v = getCustomKey(v)
+  }
+  if (typeof v === 'string') {
+    v = [v]
+  }
+  if (v.length < 2) {
+    v.push('darkred')
+  }
+
+  console.log('Processing value', JSON.stringify(vv, null, 2), '->', JSON.stringify(v, null, 2))
   if (v[0] === 'tap-hold-release') {
     console.log('v4', v[4], typeof v[4])
     if (v[4] == 'XX') {
@@ -111,23 +121,33 @@ function valueToValue(v: [string, string, Record<string, string>?]): string[] {
       v = ['⭘', 'purple']
     }
   }
-  if (v[0]?.startsWith('movemouse-accel-')) {
-    v = customKeys[':mouse' + v[0].replace(/.*-/, '')] as string[]
+  if (isString(v[0]) && v[0].startsWith('movemouse-accel-')) {
+    v = getCustomKey(':mouse' + v[0].replace(/.*-/, '')) as string[]
   }
-  if (v[0]?.startsWith('mwheel-')) {
-    v = customKeys[':wheel' + v[0].replace(/.*-/, '')] as string[]
+  if (isString(v[0]) && v[0].startsWith('mwheel-')) {
+    v = getCustomKey(':wheel' + v[0].replace(/.*-/, '')) as string[]
   }
-  return v
+  return v as KeyRenderDescriptor
 }
+
+// The actual keyboard rendering patch (to patch the svg)
+const patchDescriptor = computed(() => props.layerDefs[props.layer] || {})
+const patch = computed<Record<string, KeyRenderDescriptor>>(() =>
+  Object.fromEntries(
+    Object.entries<SExpression>(patchDescriptor.value).map(([k, vv]) => {
+      const v = valueToValue(vv)
+      return [k, v]
+    }),
+  ),
+)
 
 function refreshModifications() {
   const k = wrapper.value
   if (!k) return
   k.querySelectorAll('.added').forEach((e) => e.remove())
-  for (const [key, vraw] of Object.entries<[string, string, Record<string, string>?]>(patch.value)) {
+  for (const [key, v] of Object.entries<KeyRenderDescriptor>(patch.value)) {
     const el = k.querySelector<SVGElement>(`#${keyToId(key)}`)
-    const v = valueToValue(vraw)
-    if (el && isArray(v) && v.length >= 2 && v[0] !== undefined) {
+    if (el) {
       const x = attrFloat(el, 'x', 0)
       const y = attrFloat(el, 'y', 0)
       const w = attrFloat(el, 'width', 0)
@@ -183,5 +203,7 @@ watch(patch, refreshModifications)
 <template>
   <div ref="wrapper" class="keyboard" v-html="keyboard"></div>
   <h2>{{ layer }}</h2>
-  <pre>{{ JSON.stringify(layerDefs?.[layer], null, 2) }}</pre>
+  <pre>{{ JSON.stringify(patch, null, 2) }}</pre>
+  <hr/>
+  <pre>{{ JSON.stringify(layerDefs, null, 2) }}</pre>
 </template>

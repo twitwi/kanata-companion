@@ -4,16 +4,16 @@ import { invoke } from '@tauri-apps/api/core'
 import { listen } from '@tauri-apps/api/event'
 //import { emit } from '@tauri-apps/api/event'
 import { BaseDirectory, readTextFile } from '@tauri-apps/plugin-fs'
-import parse from 's-expression'
 
 import { ref } from 'vue'
+import { parse, type SExpression } from './sexpression'
 
 // config
 const configEntrypoint = 'test-conf/,,AULA.kbd'
 
 // actual app data
 const layer = ref('default')
-const layerDefs = ref({} as Record<string, Record<string, string>>)
+const layerDefs = ref({} as Record<string, Record<string, SExpression>>)
 
 // load config file and parse it as s-expression (lisp)
 async function loadConfig(path: string) {
@@ -45,7 +45,7 @@ async function loadConfig(path: string) {
 }
 
 function configToLayerDefs(parsed: any[]) {
-  const defs: Record<string, Record<string, string>> = {}
+  const defs: Record<string, Record<string, SExpression>> = {}
   for (const e of parsed) {
     if (Array.isArray(e) && e[0] === 'deflayermap') {
       const layerName = e[1] as string
