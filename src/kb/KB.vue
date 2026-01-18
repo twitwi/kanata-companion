@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { SExpression } from '@/sexpression';
+import type { SExpression } from '@/sexpression'
 import keyboard from './iso-azerty.svg?raw'
 
 import { onMounted, ref, computed, watch } from 'vue'
@@ -15,21 +15,24 @@ const wrapper = ref<HTMLDivElement | null>(null)
 
 // some custom key renderings, and also pseudo-keys for special actions
 type KeyRenderDescriptorPartial = string | KeyRenderDescriptor
-const customKeys : Record<string, KeyRenderDescriptorPartial> = {
+function mouse(label: string, more: Record<string, string> = {}) {
+  return [label, 'cyan', { bg: '#00007FAA', ...more }] as KeyRenderDescriptor
+}
+const customKeys: Record<string, KeyRenderDescriptorPartial> = {
   // arrows
   left: '⬅',
   up: '⬆',
   down: '⬇',
   rght: '➡',
   // mouse motion
-  ':mouseleft': ['⬅', 'cyan', { bg: '#00007FAA' }],
-  ':mouseup': ['⬆', 'cyan', { bg: '#00007FAA' }],
-  ':mousedown': ['⬇', 'cyan', { bg: '#00007FAA' }],
-  ':mouseright': ['➡', 'cyan', { bg: '#00007FAA' }],
-  ':wheelleft': ['…', 'cyan', { bg: '#00007FAA' }],
-  ':wheelup': ['…', 'cyan', { bg: '#00007FAA' }],
-  ':wheeldown': ['…', 'cyan', { bg: '#00007FAA' }],
-  ':wheelright': ['…', 'cyan', { bg: '#00007FAA' }],
+  ':mouseleft': mouse('⬅'),
+  ':mouseup': mouse('⬆'),
+  ':mousedown': mouse('⬇'),
+  ':mouseright': mouse('➡'),
+  ':wheelleft': mouse('⇜'),
+  ':wheelup': mouse('⇜', { rotate: '90' }),
+  ':wheeldown': mouse('⇝', { rotate: '90' }),
+  ':wheelright': mouse('⇝'),
   // custom look for shortcuts
   'A-S-tab': ['⎇⇤', 'darkorange'],
   'A-tab': ['⎇⇢', 'darkorange'],
@@ -41,6 +44,9 @@ const customKeys : Record<string, KeyRenderDescriptorPartial> = {
   'S-del': 'cut',
   'S-ins': 'paste',
   'C-ins': 'copy',
+  mlft: mouse('🖯'),
+  mrgt: mouse('🖰'),
+  mmid: mouse('🖱'),
 }
 function getCustomKey(k: string): KeyRenderDescriptorPartial {
   const v = customKeys[k]
@@ -71,7 +77,7 @@ function attrFloat(el: Element, name: string, defaultValue: number): number {
   return parseFloat(v)
 }
 function isString(v: string | SExpression | undefined): v is string {
-   return typeof v === 'string'
+  return typeof v === 'string'
 }
 
 // map kanata key id to svg element id
@@ -99,9 +105,13 @@ function keyToId(k: string) {
 
 // Transform an SExpression value (as parsed) into a KeyRenderDescriptor (for rendering)
 function valueToValue(vv: SExpression): KeyRenderDescriptor {
-  let v : KeyRenderDescriptorPartial | SExpression = vv
+  let v: KeyRenderDescriptorPartial | SExpression = vv
   if (typeof v === 'string' && v in customKeys) {
     v = getCustomKey(v)
+  }
+  if (v[0] === 'multi' && typeof v[1] === 'string' && v[1] in customKeys) {
+    console.log('Processing multi custom key', JSON.stringify(vv, null, 2))
+    v = getCustomKey(v[1])
   }
   if (typeof v === 'string') {
     v = [v]
@@ -110,9 +120,7 @@ function valueToValue(vv: SExpression): KeyRenderDescriptor {
     v.push('darkred')
   }
 
-  console.log('Processing value', JSON.stringify(vv, null, 2), '->', JSON.stringify(v, null, 2))
   if (v[0] === 'tap-hold-release') {
-    console.log('v4', v[4], typeof v[4])
     if (v[4] == 'XX') {
       v = ['#', 'lightgray']
     } else if (typeof v[4] === 'string') {
@@ -175,7 +183,11 @@ function refreshModifications() {
       text.setAttribute('font-size', '30')
       text.textContent = v[0]
       text.setAttribute('fill', v[1]!)
-      if (v[0].length > 2) { // reduce font size for long texts
+      if (v[2]?.rotate) {
+        text.setAttribute('transform', `rotate(${v[2].rotate}, ${x + w / 2}, ${y + h / 2})`)
+      }
+      if (v[0].length > 2) {
+        // reduce font size for long texts
         text.setAttribute('font-size', '15')
         text.setAttribute(
           'dx',
@@ -187,9 +199,6 @@ function refreshModifications() {
           'dx',
           attr(el, 'width', '0', (v) => ((parseFloat(v) * 1) / 2).toString()),
         )
-      }
-      for (const [kstyle, vstyle] of Object.entries(v[2] ?? {})) {
-        text.style.setProperty(kstyle, vstyle)
       }
       text.classList.add('added')
       el.parentNode?.appendChild(text)
@@ -204,6 +213,5 @@ watch(patch, refreshModifications)
   <div ref="wrapper" class="keyboard" v-html="keyboard"></div>
   <h2>{{ layer }}</h2>
   <pre>{{ JSON.stringify(patch, null, 2) }}</pre>
-  <hr/>
-  <pre>{{ JSON.stringify(layerDefs, null, 2) }}</pre>
+  <hr plate />
 </template>
