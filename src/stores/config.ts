@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 
 export const useConfig = defineStore('settings', () => {
-  const configFile = ref('kanata.kbd')
+  const configFile = ref('')
   const previousConfigFile = ref<string | null>(null)
   function clearPaths() {
     if (configFile.value) {
