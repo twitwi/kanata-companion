@@ -47,6 +47,21 @@ const customKeys: Record<string, KeyRenderDescriptorPartial> = {
   mlft: mouse('🖯'),
   mrgt: mouse('🖰'),
   mmid: mouse('🖱'),
+  kp1: '1',
+  kp2: '2',
+  kp3: '3',
+  kp4: '4',
+  kp5: '5',
+  kp6: '6',
+  kp7: '7',
+  kp8: '8',
+  kp9: '9',
+  kp0: '0',
+  'kp-': '-',
+  'kp+': '+',
+  'kp*': '*',
+  'kp/': '/',
+  'kp.': '.',
 }
 function getCustomKey(k: string): KeyRenderDescriptorPartial {
   const v = customKeys[k]
@@ -88,11 +103,11 @@ const keyToIdPatch: Record<string, string> = {
   '[': 'klbracket',
   ']': 'krbracket',
   ';': 'ksemicolon',
-  "'": 'kquote',
   ',': 'klt',
   '.': 'kgt',
   '/': 'kslash',
   '\\': 'kbackslash',
+  '\'': 'kquote',
 }
 function keyToId(k: string) {
   if (k in keyToIdPatch) {
@@ -212,7 +227,9 @@ watch(patch, refreshModifications)
 </script>
 <template>
   <div ref="wrapper" class="keyboard" v-html="keyboard"></div>
-  <h2>{{ layer }}</h2>
-  <pre>{{ JSON.stringify(patch, null, 2) }}</pre>
+  <details>
+    <summary>Current layer patch: {{ layer }}</summary>
+    <pre>{{ JSON.stringify(patch, null, 2) }}</pre>
+  </details>
   <hr plate />
 </template>

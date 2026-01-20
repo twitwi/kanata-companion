@@ -56,7 +56,7 @@
      inkscape:pagecheckerboard="0"
      showgrid="false"
      inkscape:zoom="2.3936874"
-     inkscape:cx="195.30537"
+     inkscape:cx="530.3533"
      inkscape:cy="184.44347"
      inkscape:window-width="1920"
      inkscape:window-height="1011"
@@ -1433,14 +1433,14 @@
        y="59.999996" />
     <rect
        style="display:inline;opacity:0.5;fill:none;-inkscape-stroke:none;stop-color:#000000"
-       id="kapos"
+       id="kquote"
        width="48"
        height="48"
        x="642"
        y="114" />
     <rect
        style="display:inline;opacity:0.5;fill:none;-inkscape-stroke:none;stop-color:#000000"
-       id="kquote"
+       id="kquotenot"
        width="48"
        height="48"
        x="696"

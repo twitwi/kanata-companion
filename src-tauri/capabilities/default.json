@@ -7,9 +7,10 @@
   ],
   "permissions": [
     "core:default",
-    {
+  {
       "identifier": "fs:allow-app-read-recursive",
-      "allow": [{ "path": "$HOME/shared/ergonomics/kanata-companion/test-conf/*" }]
-    }
+      "allow": [{ "path": "**/*" }]
+    },
+    "dialog:default"
   ]
 }

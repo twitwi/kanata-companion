@@ -8,9 +8,15 @@ dependencies:
   '@tauri-apps/api':
     specifier: ^2.9.1
     version: 2.9.1
+  '@tauri-apps/plugin-dialog':
+    specifier: ~2
+    version: 2.6.0
   '@tauri-apps/plugin-fs':
     specifier: ~2
     version: 2.4.5
+  '@tauri-store/pinia':
+    specifier: ^4.1.0
+    version: 4.1.0(typescript@5.9.3)
   pinia:
     specifier: ^3.0.4
     version: 3.0.4(typescript@5.9.3)(vue@3.5.26)
@@ -1089,10 +1095,34 @@ packages:
       '@tauri-apps/cli-win32-x64-msvc': 2.9.6
     dev: true
 
+  /@tauri-apps/plugin-dialog@2.6.0:
+    resolution: {integrity: sha512-q4Uq3eY87TdcYzXACiYSPhmpBA76shgmQswGkSVio4C82Sz2W4iehe9TnKYwbq7weHiL88Yw19XZm7v28+Micg==}
+    dependencies:
+      '@tauri-apps/api': 2.9.1
+    dev: false
+
   /@tauri-apps/plugin-fs@2.4.5:
     resolution: {integrity: sha512-dVxWWGE6VrOxC7/jlhyE+ON/Cc2REJlM35R3PJX3UvFw2XwYhLGQVAIyrehenDdKjotipjYEVc4YjOl3qq90fA==}
     dependencies:
       '@tauri-apps/api': 2.9.1
+    dev: false
+
+  /@tauri-store/pinia@4.1.0(typescript@5.9.3):
+    resolution: {integrity: sha512-5zn4c/IBzga+tihsS5dXywzsg9Xs+ZylRvyn899Cyz+tbJxZ00XQCiUO/DrTcwdseKz85rn7aFtjtDZPh1H5/g==}
+    dependencies:
+      '@tauri-apps/api': 2.9.1
+      '@tauri-store/shared': 0.10.2
+      pinia: 3.0.4(typescript@5.9.3)(vue@3.5.26)
+      vue: 3.5.26(typescript@5.9.3)
+    transitivePeerDependencies:
+      - typescript
+    dev: false
+
+  /@tauri-store/shared@0.10.2:
+    resolution: {integrity: sha512-hnEBbe/m9UG5ATSBp4yJOosLkX5QLblVsGIvz7mtBAqmzeWFfjP4+8X/T81L+bCH6+ref/0vsR9Ekex138kAfg==}
+    dependencies:
+      '@tauri-apps/api': 2.9.1
+      es-toolkit: 1.44.0
     dev: false
 
   /@tsconfig/node24@24.0.4:
@@ -1722,6 +1752,10 @@ packages:
   /error-stack-parser-es@1.0.5:
     resolution: {integrity: sha512-5qucVt2XcuGMcEGgWI7i+yZpmpByQ8J1lHhcL7PwqCwu9FPP3VUXzT4ltHe5i2z9dePwEHcDVOAfSnHsOlCXRA==}
     dev: true
+
+  /es-toolkit@1.44.0:
+    resolution: {integrity: sha512-6penXeZalaV88MM3cGkFZZfOoLGWshWWfdy0tWw/RlVVyhvMaWSBTOvXNeiW3e5FwdS5ePW0LGEu17zT139ktg==}
+    dev: false
 
   /esbuild@0.27.2:
     resolution: {integrity: sha512-HyNQImnsOC7X9PMNaCIeAm4ISCQXs5a5YasTXVliKv4uuBo1dKrG0A+uQS8M5eXjVMnLg3WgXaKvprHlFJQffw==}
