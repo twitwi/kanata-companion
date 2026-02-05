@@ -231,27 +231,20 @@ function refreshModifications() {
       if (v[2]?.rotate) {
         text.setAttribute('transform', `rotate(${v[2].rotate}, ${x + w / 2}, ${y + h / 2})`)
       }
-      if (v[0].length > 2) {
-        // reduce font size for long texts
-        text.setAttribute('font-size', '10')
-        text.setAttribute(
-          'dx',
-          attr(el, 'width', '0', (v) => ((parseFloat(v) * 1) / 2).toString()),
-        )
-      } else if (v[0].length > 2) {
-        // reduce font size for long texts
-        text.setAttribute('font-size', '15')
-        text.setAttribute(
-          'dx',
-          attr(el, 'width', '0', (v) => ((parseFloat(v) * 1) / 2).toString()),
-        )
-      } else if (v[0].length > 1) {
-        text.setAttribute('font-size', '22')
-        text.setAttribute(
-          'dx',
-          attr(el, 'width', '0', (v) => ((parseFloat(v) * 1) / 2).toString()),
-        )
+      let s = 22
+      const getDx = (el: SVGcElement) => attr(el, 'width', '0', (v) => ((parseFloat(v) * 1) / 2).toString())
+      const l = v[0].length
+      if (l > 8) {
+        s = 5
+      } else if (l > 5) {
+        s = 10
+      } else if (l > 2) {
+        s = 14
+      } else if (l > 1) {
+        s = 22
       }
+      text.setAttribute('font-size', `${s}`)
+      text.setAttribute('dx', getDx(el))
       text.classList.add('added')
       el.parentNode?.appendChild(text)
     }
