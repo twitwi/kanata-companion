@@ -232,7 +232,7 @@ function refreshModifications() {
         text.setAttribute('transform', `rotate(${v[2].rotate}, ${x + w / 2}, ${y + h / 2})`)
       }
       let s = 22
-      const getDx = (el: SVGcElement) => attr(el, 'width', '0', (v) => ((parseFloat(v) * 1) / 2).toString())
+      const getDx = (el: SVGElement) => attr(el, 'width', '0', (v) => ((parseFloat(v) * 1) / 2).toString())
       const l = v[0].length
       if (l > 8) {
         s = 5
