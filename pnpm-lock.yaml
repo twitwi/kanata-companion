@@ -6,8 +6,8 @@ settings:
 
 dependencies:
   '@tauri-apps/api':
-    specifier: ^2.9.1
-    version: 2.9.1
+    specifier: ^2.10.1
+    version: 2.10.1
   '@tauri-apps/plugin-dialog':
     specifier: ~2
     version: 2.6.0
@@ -974,8 +974,8 @@ packages:
     dev: true
     optional: true
 
-  /@tauri-apps/api@2.9.1:
-    resolution: {integrity: sha512-IGlhP6EivjXHepbBic618GOmiWe4URJiIeZFlB7x3czM0yDHHYviH1Xvoiv4FefdkQtn6v7TuwWCRfOGdnVUGw==}
+  /@tauri-apps/api@2.10.1:
+    resolution: {integrity: sha512-hKL/jWf293UDSUN09rR69hrToyIXBb8CjGaWC7gfinvnQrBVvnLr08FeFi38gxtugAVyVcTa5/FD/Xnkb1siBw==}
     dev: false
 
   /@tauri-apps/cli-darwin-arm64@2.9.6:
@@ -1098,19 +1098,19 @@ packages:
   /@tauri-apps/plugin-dialog@2.6.0:
     resolution: {integrity: sha512-q4Uq3eY87TdcYzXACiYSPhmpBA76shgmQswGkSVio4C82Sz2W4iehe9TnKYwbq7weHiL88Yw19XZm7v28+Micg==}
     dependencies:
-      '@tauri-apps/api': 2.9.1
+      '@tauri-apps/api': 2.10.1
     dev: false
 
   /@tauri-apps/plugin-fs@2.4.5:
     resolution: {integrity: sha512-dVxWWGE6VrOxC7/jlhyE+ON/Cc2REJlM35R3PJX3UvFw2XwYhLGQVAIyrehenDdKjotipjYEVc4YjOl3qq90fA==}
     dependencies:
-      '@tauri-apps/api': 2.9.1
+      '@tauri-apps/api': 2.10.1
     dev: false
 
   /@tauri-store/pinia@4.1.0(typescript@5.9.3):
     resolution: {integrity: sha512-5zn4c/IBzga+tihsS5dXywzsg9Xs+ZylRvyn899Cyz+tbJxZ00XQCiUO/DrTcwdseKz85rn7aFtjtDZPh1H5/g==}
     dependencies:
-      '@tauri-apps/api': 2.9.1
+      '@tauri-apps/api': 2.10.1
       '@tauri-store/shared': 0.10.2
       pinia: 3.0.4(typescript@5.9.3)(vue@3.5.26)
       vue: 3.5.26(typescript@5.9.3)
@@ -1121,7 +1121,7 @@ packages:
   /@tauri-store/shared@0.10.2:
     resolution: {integrity: sha512-hnEBbe/m9UG5ATSBp4yJOosLkX5QLblVsGIvz7mtBAqmzeWFfjP4+8X/T81L+bCH6+ref/0vsR9Ekex138kAfg==}
     dependencies:
-      '@tauri-apps/api': 2.9.1
+      '@tauri-apps/api': 2.10.1
       es-toolkit: 1.44.0
     dev: false
 

@@ -16,7 +16,7 @@
     "format": "prettier --write --experimental-cli src/"
   },
   "dependencies": {
-    "@tauri-apps/api": "^2.9.1",
+    "@tauri-apps/api": "2.10.1",
     "@tauri-apps/plugin-dialog": "~2",
     "@tauri-apps/plugin-fs": "~2",
     "@tauri-store/pinia": "^4.1.0",
