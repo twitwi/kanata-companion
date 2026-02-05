@@ -19,6 +19,7 @@ if (config.configFile === null || config.configFile === '') {
 // actual app data
 const layer = ref('default')
 const layerDefs = ref({} as Record<string, Record<string, SExpression>>)
+const rawConfig = ref({} as SExpression)
 
 // load config file and parse it as s-expression (lisp)
 async function loadConfig(path: string) {
@@ -26,6 +27,7 @@ async function loadConfig(path: string) {
   const fixedContent = fileContent.replace(/;;.*/g, '').replace(/(\s)([,'`])(\s)/g, '$1"$2"$3')
   console.log('Loaded config file:', fixedContent)
   const parsed = parse('(\n' + fixedContent + '\n)')
+  console.log('Parsed config:', parsed)
 
   // process includes
   let ientry = 0
@@ -37,16 +39,74 @@ async function loadConfig(path: string) {
 
       // merge included config into current parsed config
       for (const incEntry of includedConfig as any[]) {
-        ;(parsed as any[]).splice(ientry + 1, 0, incEntry)
+        ; (parsed as any[]).splice(ientry + 1, 0, incEntry)
       }
       // remove the include entry
-      ;(parsed as any[]).splice(ientry, 1)
+      ; (parsed as any[]).splice(ientry, 1)
     } else {
       ientry += 1
     }
   }
-  console.log('Parsed config:', parsed)
-  return parsed
+
+  // gather template defs
+  const templateDefs: Record<string, any> = {}
+  for (const entry of parsed as any[]) {
+    if (Array.isArray(entry) && entry[0] === 'deftemplate') {
+      const templateName = `${entry[1]}`
+      templateDefs[templateName] = entry.slice(2)
+    }
+  }
+  console.log('Template definitions:', templateDefs)
+
+  // process a list with possible template expansions
+  const processEach = (entry: any[]): any[] => {
+    const res = []
+    for (const e of entry) {
+      const pe = processTemplates(e)
+      res.push(...pe)
+    }
+    return res
+  }
+  // recursive walker, expand templates, returns a list of entries
+  const processTemplates = (entry: any): any[] => {
+    if (Array.isArray(entry)) {
+      if (entry[0] === 't!' || entry[0] === 'template-expand') {
+        const templateName = `${entry[1]}`
+        const templateDef = templateDefs[templateName]
+        if (!templateDef) {
+          console.warn('Template not found:', templateName)
+          return [entry]
+        }
+        // clone the templateDef
+        const clonedDef = JSON.parse(JSON.stringify(templateDef.slice(1)))
+        // substitute parameters
+        for (const iarg in templateDef[0]) {
+          const name = `${templateDef[0][iarg]}`
+          const value = entry[2 + Number(iarg)]
+          const replaceIn = (obj: any): any => {
+            if (Array.isArray(obj)) {
+              return obj.map(replaceIn)
+            } else {
+              return obj === `$${name}` ? value : obj
+            }
+          }
+          for (let i = 0; i < clonedDef.length; i++) {
+            clonedDef[i] = replaceIn(clonedDef[i])
+          }
+        }
+        // simple recurse
+        return processEach(clonedDef)
+      } else {
+        return [processEach(entry)]
+      }
+    }
+    return [entry]
+  }
+  const processed = processEach(parsed as any[])
+  console.log('Processed config with templates:', processed)
+
+  rawConfig.value = processed
+  return processed
 }
 
 function configToLayerDefs(parsed: any[]) {
@@ -103,8 +163,12 @@ invoke('start_kanata_listener')
       <button @click="queryConfigPaths()">change</button>
     </details>
     <details>
-      <summary>Config content: {{ config.configFile }}</summary>
-      <pre>{{ layerDefs }}</pre>
+      <summary>Config file: {{ config.configFile }}</summary>
+      <pre>{{ JSON.stringify(rawConfig, null, 2) }}</pre>
+    </details>
+    <details>
+      <summary>Layer defs:</summary>
+       <pre>{{ layerDefs }}</pre>
     </details>
   </template>
   <div v-else @click="queryConfigPaths()">
@@ -117,9 +181,11 @@ invoke('start_kanata_listener')
 #key-slots .added {
   stroke: none;
 }
+
 #key-slots :not(.added) {
   stroke: transparent;
 }
+
 details {
   margin-top: 1em;
 }

@@ -120,6 +120,10 @@ function keyToId(k: string) {
 }
 
 // Transform an SExpression value (as parsed) into a KeyRenderDescriptor (for rendering)
+const BASEMODS = Object.fromEntries('sft ctl alt'.split(' ').map((m) => [[`r${m}`, `${m}`], [`l${m}`,  `${m}`]]).flat())
+BASEMODS['ralt'] = 'altgr'
+BASEMODS['lmet'] = 'super'
+BASEMODS['rmet'] = 'super'
 function valueToValue(vv: SExpression): KeyRenderDescriptor {
   let v: KeyRenderDescriptorPartial | SExpression = vv
   if (typeof v === 'string' && v in customKeys) {
@@ -135,21 +139,46 @@ function valueToValue(vv: SExpression): KeyRenderDescriptor {
   if (v.length < 2) {
     v.push('darkred')
   }
-
-  if (v[0] === 'tap-hold-release') {
-    if (v[4] == 'XX') {
-      v = ['#', 'lightgray']
-    } else if (typeof v[4] === 'string') {
-      v = ['⭘', 'green']
-    } else {
-      v = ['⭘', 'purple']
-    }
-  }
   if (isString(v[0]) && v[0].startsWith('movemouse-accel-')) {
     v = getCustomKey(':mouse' + v[0].replace(/.*-/, '')) as string[]
   }
   if (isString(v[0]) && v[0].startsWith('mwheel-')) {
     v = getCustomKey(':wheel' + v[0].replace(/.*-/, '')) as string[]
+  }
+  function handle(vv: string | SExpression | Record<string, string>): KeyRenderDescriptor | undefined {
+    if (vv === 'XX') {
+        return ['#', 'lightgray']
+    } else if (typeof vv === 'string') {
+      if (vv in BASEMODS) {
+        return [BASEMODS[vv], 'green']
+      } else {
+        return ['⭘', 'green']
+      }
+    } else if (Array.isArray(vv)) {
+      if (vv[0] === 'layer-while-held') {
+        return [(vv[1] ?? '?') as string, 'purple']
+      } else if (vv[0] === 'multi') {
+        for (const part of vv.slice(1)) {
+          const newv = handle(part)
+          if (newv !== undefined) {
+            return newv
+          }
+        }
+        return undefined
+      } else {
+        return ['⭘', 'purple']
+      }
+    } else {
+      return undefined
+    }
+  }
+  if (v[0] === 'tap-hold-release' && v[4] !== undefined) {
+    const newv = handle(v[4])
+    if (newv !== undefined) {
+      v = newv
+    } else {
+      v = ['⭘', 'red']
+    }
   }
   return v as KeyRenderDescriptor
 }
@@ -203,6 +232,13 @@ function refreshModifications() {
         text.setAttribute('transform', `rotate(${v[2].rotate}, ${x + w / 2}, ${y + h / 2})`)
       }
       if (v[0].length > 2) {
+        // reduce font size for long texts
+        text.setAttribute('font-size', '10')
+        text.setAttribute(
+          'dx',
+          attr(el, 'width', '0', (v) => ((parseFloat(v) * 1) / 2).toString()),
+        )
+      } else if (v[0].length > 2) {
         // reduce font size for long texts
         text.setAttribute('font-size', '15')
         text.setAttribute(
