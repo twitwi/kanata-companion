@@ -4,7 +4,7 @@ import { invoke } from '@tauri-apps/api/core'
 import { listen } from '@tauri-apps/api/event'
 import { readTextFile } from '@tauri-apps/plugin-fs'
 
-import { ref, watchEffect } from 'vue'
+import { ref, watchEffect, type Ref } from 'vue'
 import { parse, type SExpression } from './sexpression'
 import { useConfig } from './stores/config'
 import { queryConfigPaths } from './kb/tools'
@@ -19,7 +19,7 @@ if (config.configFile === null || config.configFile === '') {
 // actual app data
 const layer = ref('default')
 const layerDefs = ref({} as Record<string, Record<string, SExpression>>)
-const rawConfig = ref({} as SExpression)
+const rawConfig = ref({}) as Ref<SExpression>
 
 // load config file and parse it as s-expression (lisp)
 async function loadConfig(path: string) {
@@ -31,26 +31,26 @@ async function loadConfig(path: string) {
 
   // process includes
   let ientry = 0
-  while (ientry < (parsed as any[]).length) {
-    const entry = (parsed as any[])[ientry]
+  while (ientry < (parsed).length) {
+    const entry = (parsed)[ientry]
     if (Array.isArray(entry) && entry[0] === 'include') {
       const includePath = entry[1] as string
       const includedConfig = await loadConfig(path.replace(/\/[^\/]*$/, '/') + includePath)
 
       // merge included config into current parsed config
-      for (const incEntry of includedConfig as any[]) {
-        ; (parsed as any[]).splice(ientry + 1, 0, incEntry)
+      for (const incEntry of includedConfig) {
+        ; parsed.splice(ientry + 1, 0, incEntry)
       }
       // remove the include entry
-      ; (parsed as any[]).splice(ientry, 1)
+      ; parsed.splice(ientry, 1)
     } else {
       ientry += 1
     }
   }
 
   // gather template defs
-  const templateDefs: Record<string, any> = {}
-  for (const entry of parsed as any[]) {
+  const templateDefs: Record<string, SExpression> = {}
+  for (const entry of parsed) {
     if (Array.isArray(entry) && entry[0] === 'deftemplate') {
       const templateName = `${entry[1]}`
       templateDefs[templateName] = entry.slice(2)
@@ -59,7 +59,7 @@ async function loadConfig(path: string) {
   console.log('Template definitions:', templateDefs)
 
   // process a list with possible template expansions
-  const processEach = (entry: any[]): any[] => {
+  const processEach = (entry: SExpression[]): SExpression[] => {
     const res = []
     for (const e of entry) {
       const pe = processTemplates(e)
@@ -68,7 +68,7 @@ async function loadConfig(path: string) {
     return res
   }
   // recursive walker, expand templates, returns a list of entries
-  const processTemplates = (entry: any): any[] => {
+  const processTemplates = (entry: SExpression): SExpression[] => {
     if (Array.isArray(entry)) {
       if (entry[0] === 't!' || entry[0] === 'template-expand') {
         const templateName = `${entry[1]}`
@@ -80,10 +80,11 @@ async function loadConfig(path: string) {
         // clone the templateDef
         const clonedDef = JSON.parse(JSON.stringify(templateDef.slice(1)))
         // substitute parameters
-        for (const iarg in templateDef[0]) {
-          const name = `${templateDef[0][iarg]}`
-          const value = entry[2 + Number(iarg)]
-          const replaceIn = (obj: any): any => {
+        const argNames = templateDef[0] as SExpression
+        for (const iarg in argNames) {
+          const name = `${argNames[iarg]}`
+          const value = entry[2 + Number(iarg)]!
+          const replaceIn = (obj: string | SExpression): string | SExpression => {
             if (Array.isArray(obj)) {
               return obj.map(replaceIn)
             } else {
@@ -97,7 +98,7 @@ async function loadConfig(path: string) {
         // simple recurse
         return processEach(clonedDef)
       } else {
-        return [processEach(entry)]
+        return [processEach(entry as SExpression[])]
       }
     }
     return [entry]
